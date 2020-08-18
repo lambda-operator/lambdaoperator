@@ -1,0 +1,46 @@
+%matplotlib inline
+from IPython.display import Image
+import numpy as np
+from qutip import *
+from qutip.qip.operations import *
+from qutip.qip.circuit import QubitCircuit, Gate
+
+def jordanwigner(j,n):
+# n is circuit width
+    listofmg = []
+    if j%2 == 0:
+        k = int(j/2);
+        for i in range(k-1):
+            listofmg.append(sigmaz())
+        listofmg.append(sigmay())
+        for i in range(n-k):
+            listofmg.append(identity(2))
+    else:
+        k = int((j+1)/2); 
+        for i in range(k-1):
+            listofmg.append(sigmaz())
+        listofmg.append(sigmax())
+        for i in range(n-k):
+            listofmg.append(identity(2))
+    overallmg = listofmg[0]
+    for k in range(1,n):
+        overallmg = tensor(overallmg,listofmg[k])
+    return overallmg
+
+# generate m random antisymmetric matrices to give rise to m separate Gaussian states
+cwidth=3
+m=3
+randomcorrelation = [(np.random.rand(2*cwidth,2*cwidth) - 1)*2 for i in range(m)]
+randomcorrelation = [np.tril(randomcorrelation[i]) - np.tril(randomcorrelation[i]).T for i in range(m)]
+qhamiltonian = []
+for n in range(m):
+    indivham = 0
+    for i in range(2*cwidth):
+        for j in range(2*cwidth):
+            indivham = indivham + randomcorrelation[n][i,j] * jordanwigner(i,cwidth) * jordanwigner(j,cwidth)
+    indivham = (-indivham).expm()
+    qhamiltonian.append(indivham)
+a = qhamiltonian[0].full(); b = qhamiltonian[1].full(); c = qhamiltonian[2].full()
+statematrix = np.zeros((2 ** cwidth,3),dtype=complex)
+statematrix[:,0] = a[:,0]; statematrix[:,1] = b[:,0]; statematrix[:,2] = c[:,0];
+# statematrix gives you the Gaussian states as columns in the matrix
