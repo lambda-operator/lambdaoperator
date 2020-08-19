@@ -1,0 +1,46 @@
+%matplotlib inline
+from IPython.display import Image
+from numpy import pi
+import numpy as np
+from qutip import *
+from qutip.qip.operations import *
+from qutip.qip.circuit import QubitCircuit, Gate
+from qutip.qip.operations import gate_sequence_product
+
+# now defining a random MG given parameters
+def matchgate(vector):
+    mat = tensor((1j*vector[2]*sigmaz()).expm(),(1j*vector[3]*sigmaz()).expm()) * (1j*(vector[4]*tensor(sigmax(),sigmax()) + vector[5]*tensor(sigmay(),sigmay()))).expm() * tensor((1j*vector[0]*sigmaz()).expm(),(1j*vector[1]*sigmaz()).expm())
+    return Qobj(mat, dims=[[2, 2], [2, 2]])
+
+def gabmatchgate(A,B):
+    mat = np.zeros((4, 4), dtype=np.complex)
+    mat[0,0] = A[0,0]; mat[0,3] = A[0,1]; mat[1,1] = B[0,0]; mat[1,2] = B[0,1]
+    mat[2,1] = B[1,0]; mat[2,2] = B[1,1]; mat[3,0] = A[1,0]; mat[3,3] = A[1,1];
+    return Qobj(mat, dims=[[2, 2], [2, 2]])
+
+# here we design our arbitrary gates
+cwidth=3; csize=50
+randomcoefficients = np.random.rand(6,3)
+randomcoefficients = 2 * (randomcoefficients - 0.5)
+
+# here we pick which gates act where 
+qubitlines = np.random.randint(cwidth-1, size=(csize)).tolist();
+gatechoice = np.random.randint(3, size=(csize)).tolist();
+
+# now we design the circuit
+qc = QubitCircuit(N=cwidth)
+qc.user_gates = {"MG1": matchgate(randomcoefficients[:,gatechoice[0]]), "MG2": matchgate(randomcoefficients[:,gatechoice[1]]), "MG3": matchgate(randomcoefficients[:,gatechoice[2]])}
+for i in range(csize):
+    targets = [qubitlines[i],qubitlines[i]+1]
+    if gatechoice[i] == 0:
+        qc.add_gate("MG1", targets=targets)
+    elif gatechoice[i] == 1:
+        qc.add_gate("MG2", targets = targets)
+    elif gatechoice[i] == 2:
+        qc.add_gate("MG3", targets = targets)
+#qc.png
+U_list = qc.propagators()
+U_list = qc.propagators()
+overallcircuit = gate_sequence_product(U_list)
+basisket = ket([0] * cwidth,2)
+gaussianstate = overallcircuit * basisket;
