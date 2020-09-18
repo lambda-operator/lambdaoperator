@@ -53,3 +53,32 @@ def parityOf(integer):
     nlist = [int(d) for d in "{0:b}".format(integer)]
     parity = np.sum(nlist) % 2
     return(parity)
+
+
+# Parameters: make sure you change these variables and add n copies of qzero to lambdaoperator tensor product
+n = 6
+lambdaoperator = tensor(qzero(2),qzero(2),qzero(2),qzero(2),qzero(2),qzero(2)); lambdaoperator = tensor(lambdaoperator,lambdaoperator)
+
+# Working Code
+cwidth=n;
+for i in range(2*cwidth):
+    lambdaoperator = lambdaoperator + tensor(jordanwigner(i+1,cwidth),jordanwigner(i+1,cwidth))
+    #print(lambdaoperator)
+print([i+1 for i in range(2*cwidth)])
+
+nvector = sp.symarray('b', 2**(n-1))
+nfermionicstate = np.array([0 for i in range(2**n)], dtype = object)
+counter = -1
+for i in range(2**n):
+    if parityOf(i)==0:
+        counter = counter+1
+        nfermionicstate[i] = nvector[counter]
+symvec = TensorProduct(nfermionicstate, nfermionicstate)
+symvec = np.transpose(symvec)
+
+constraints = lambdaoperator[:,:]*symvec
+for i in range(256):
+    if np.sum(constraints[i,:])!=0:
+        print(np.sum(constraints[i,:]))
+		
+# each entry in the printed table is set equal to zero and this is the constraint required.
