@@ -77,7 +77,7 @@ symvec = TensorProduct(nfermionicstate, nfermionicstate)
 symvec = np.transpose(symvec)
 
 constraints = lambdaoperator[:,:]*symvec
-for i in range(256):
+for i in range(2 ** (n+3)):
     if np.sum(constraints[i,:])!=0:
         print(np.sum(constraints[i,:]))
 		
