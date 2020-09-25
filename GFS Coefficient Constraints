@@ -80,5 +80,6 @@ constraints = lambdaoperator[:,:]*symvec
 for i in range(2 ** (n+3)):
     if np.sum(constraints[i,:])!=0:
         print(np.sum(constraints[i,:]))
+	print('== 0 &&')
 		
 # each entry in the printed table is set equal to zero and this is the constraint required.
