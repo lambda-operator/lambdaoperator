@@ -55,9 +55,14 @@ def parityOf(integer):
     return(parity)
 
 
-# Parameters: make sure you change these variables and add n copies of qzero to lambdaoperator tensor product
+# Parameters
 n = 6
-lambdaoperator = tensor(qzero(2),qzero(2),qzero(2),qzero(2),qzero(2),qzero(2)); lambdaoperator = tensor(lambdaoperator,lambdaoperator)
+
+
+lambdaoperator = tensor(qzero(2),qzero(2))
+for i in range(n-2):
+	lambdaoperator = tensor(qzero(2),lambdaoperator)
+lambdaoperator = tensor(lambdaoperator,lambdaoperator)
 
 # Working Code
 cwidth=n;
