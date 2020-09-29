@@ -55,21 +55,17 @@ def parityOf(integer):
     return(parity)
 
 
-# Parameters
+# Parameter
 n = 6
 
-
+# Working Code
 lambdaoperator = tensor(qzero(2),qzero(2))
 for i in range(n-2):
 	lambdaoperator = tensor(qzero(2),lambdaoperator)
 lambdaoperator = tensor(lambdaoperator,lambdaoperator)
 
-# Working Code
-cwidth=n;
-for i in range(2*cwidth):
-    lambdaoperator = lambdaoperator + tensor(jordanwigner(i+1,cwidth),jordanwigner(i+1,cwidth))
-    #print(lambdaoperator)
-print([i+1 for i in range(2*cwidth)])
+for i in range(2*n):
+    lambdaoperator = lambdaoperator + tensor(jordanwigner(i+1,n),jordanwigner(i+1,n))
 
 nvector = sp.symarray('b', 2**(n-1))
 nfermionicstate = np.array([0 for i in range(2**n)], dtype = object)
@@ -80,6 +76,21 @@ for i in range(2**n):
         nfermionicstate[i] = nvector[counter]
 symvec = TensorProduct(nfermionicstate, nfermionicstate)
 symvec = np.transpose(symvec)
+
+# We now introduce the reducedlambdaoperator to break up the calculation to specifically search for bilinear forms of a given number of terms
+# In line 85, we declare that we will only look at rows with more than 3 nonzero entries, this can easily be edited to search for rows with exactly 4, etc
+
+rowlist = []
+for i in range(2**(2*n)):
+    if np.count_nonzero(lambdaoperator[i,:]) > 3:
+    # if np.count_nonzero(lambdaoperator[i,:]) == 4:
+        rowlist.append(i)
+
+succinctlambda = np.zeros((len(rowlist),2**(2*n)), dtype = complex)
+for i in range(len(rowlist)):
+    succinctlambda[i,:] = lambdaoperator[rowlist[i],:]
+
+# Now choose either lambdaoperator or succinctlambda depending on whether you want the full calculation or the broken up version.
 
 constraints = lambdaoperator[:,:]*symvec
 for i in range(2 ** (n+3)):
