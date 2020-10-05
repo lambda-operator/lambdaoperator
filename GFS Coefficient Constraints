@@ -1,5 +1,5 @@
 """ This code is to obtain the Coefficient Constraints for n qubit Gaussian states. In the first few lines, specify what the size 'n' of the system is. Then specify the type of constraint - ie a bilinear form in 'constraintlength' terms will be a quadratic polynomial with this many terms. If (this is more the case for smaller qubit systems) you want to do the whole calculation of all constraints in one go, in line 76 change 
-<<constraints = succinctlambda[:,:]*symvec>> into <<constraints = lambdaoperator[:,:]*symvec>> """
+<<constraints = succinctlambda[:,:]*symvec>> into <<constraints = lambdaoperator[:,:]*symvec>>. The code outputs directly to Mathematica Formatting to allow for easy simplification. """
 
 n = 8; constraintlength = 4
 
@@ -74,5 +74,17 @@ for i in range(len(rowlist)):
 constraints = lambdaoperator[:,:]*symvec
 for i in range(2 ** (n+3)):
     if np.sum(constraints[i,:])!=0:
-        print(np.sum(constraints[i,:]))
-	print('== 0 &&')
+        mathematicaconstraint = str(np.sum(constraints[i,:])).replace('b_', 'Subscript[b, ')
+        mathematicaconstraint = mathematicaconstraint.replace(' 0*S', ' 0]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('1*S', '1]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('2*S', '2]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('3*S', '3]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('4*S', '4]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('5*S', '5]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('6*S', '6]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('7*S', '7]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('8*S', '8]*S')
+        mathematicaconstraint = mathematicaconstraint.replace('9*S', '9]*S')
+        mathematicaconstraint = mathematicaconstraint.replace(' + ', '] + ')
+        mathematicaconstraint = mathematicaconstraint.replace(' - ', '] - ')
+        print(mathematicaconstraint, '] == 0 &&')
