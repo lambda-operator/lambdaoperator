@@ -71,7 +71,7 @@ succinctlambda = np.zeros((len(rowlist),2**(2*n)), dtype = complex)
 for i in range(len(rowlist)):
     succinctlambda[i,:] = lambdaoperator[rowlist[i],:]
 
-constraints = lambdaoperator[:,:]*symvec
+constraints = succinctlambda[:,:]*symvec
 for i in range(2 ** (n+3)):
     if np.sum(constraints[i,:])!=0:
         mathematicaconstraint = str(np.sum(constraints[i,:])).replace('b_', 'Subscript[b, ')
