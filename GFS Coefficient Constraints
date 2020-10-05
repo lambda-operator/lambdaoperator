@@ -1,5 +1,8 @@
-# this code uses SYMPY to obtain constraints on the coefficients of the associated vectors of GFS.
-# to change the number of qubits in the system, rmb to change n and to add copies of qzero(2) as tensor products
+""" This code is to obtain the Coefficient Constraints for n qubit Gaussian states. In the first few lines, specify what the size 'n' of the system is. Then specify the type of constraint - ie a bilinear form in 'constraintlength' terms will be a quadratic polynomial with this many terms. If (this is more the case for smaller qubit systems) you want to do the whole calculation of all constraints in one go, in line 76 change 
+<<constraints = succinctlambda[:,:]*symvec>> into <<constraints = lambdaoperator[:,:]*symvec>> """
+
+n = 8; constraintlength = 4
+
 
 %matplotlib inline
 import numpy as np
@@ -11,18 +14,6 @@ from sympy.solvers import solve
 from sympy import Symbol
 from sympy.physics.quantum import TensorProduct
 
-
-# function definitions
-
-def matchgate(vector):
-    mat = tensor((1j*vector[2]*sigmaz()).expm(),(1j*vector[3]*sigmaz()).expm()) * (1j*(vector[4]*tensor(sigmax(),sigmax()) + vector[5]*tensor(sigmay(),sigmay()))).expm() * tensor((1j*vector[0]*sigmaz()).expm(),(1j*vector[1]*sigmaz()).expm())
-    return Qobj(mat, dims=[[2, 2], [2, 2]])
-
-def gabmatchgate(A,B):
-    mat = np.zeros((4, 4), dtype=np.complex)
-    mat[0,0] = A[0,0]; mat[0,3] = A[0,1]; mat[1,1] = B[0,0]; mat[1,2] = B[0,1]
-    mat[2,1] = B[1,0]; mat[2,2] = B[1,1]; mat[3,0] = A[1,0]; mat[3,3] = A[1,1];
-    return Qobj(mat, dims=[[2, 2], [2, 2]])
 
 def jordanwigner(j,n):
 # n is circuit width
@@ -45,8 +36,6 @@ def jordanwigner(j,n):
     overallmg = listofmg[0]
     for k in range(1,len(listofmg)):
         overallmg = tensor(overallmg,listofmg[k])
-#    print(len(listofmg))
-#    print(listofmg)
     return overallmg
 
 def parityOf(integer):
@@ -55,10 +44,6 @@ def parityOf(integer):
     return(parity)
 
 
-# Parameter
-n = 6
-
-# Working Code
 lambdaoperator = tensor(qzero(2),qzero(2))
 for i in range(n-2):
 	lambdaoperator = tensor(qzero(2),lambdaoperator)
@@ -77,25 +62,17 @@ for i in range(2**n):
 symvec = TensorProduct(nfermionicstate, nfermionicstate)
 symvec = np.transpose(symvec)
 
-# We now introduce the reducedlambdaoperator to break up the calculation to specifically search for bilinear forms of a given number of terms
-# In line 85, we declare that we will only look at rows with more than 3 nonzero entries, this can easily be edited to search for rows with exactly 4, etc
-
 rowlist = []
 for i in range(2**(2*n)):
-    if np.count_nonzero(lambdaoperator[i,:]) > 3:
-    # if np.count_nonzero(lambdaoperator[i,:]) == 4:
+    if np.count_nonzero(lambdaoperator[i,:]) == constraintlength:
         rowlist.append(i)
 
 succinctlambda = np.zeros((len(rowlist),2**(2*n)), dtype = complex)
 for i in range(len(rowlist)):
     succinctlambda[i,:] = lambdaoperator[rowlist[i],:]
 
-# Now choose either lambdaoperator or succinctlambda depending on whether you want the full calculation or the broken up version.
-
 constraints = lambdaoperator[:,:]*symvec
 for i in range(2 ** (n+3)):
     if np.sum(constraints[i,:])!=0:
         print(np.sum(constraints[i,:]))
 	print('== 0 &&')
-		
-# each entry in the printed table is set equal to zero and this is the constraint required.
