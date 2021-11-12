@@ -1,6 +1,5 @@
 %matplotlib inline
 from IPython.display import Image
-from numpy import pi
 import numpy as np
 from qutip import *
 from qutip.qip.operations import *
